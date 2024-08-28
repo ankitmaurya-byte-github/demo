@@ -1,21 +1,33 @@
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import webfont from "webfontloader";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 function App() {
   // const [count, setCount] = useState(0);
 
+  // useWebFontLoader();
   return (
-    <div className="text-red-700 bg-blue-800">
-      sggngfmnm
-      <p className="text-lg text-red-800">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis quo
-        adipisci atque corporis, nam hic consectetur laudantium. Nihil aperiam,
-        magni praesentium culpa illum doloribus adipisci, molestiae saepe
-        suscipit fugiat ipsam accusamus atque blanditiis distinctio.
-      </p>
-      <button className="text-red bg-red-700">count</button>
-      hfdfd
+    <div className="relative">
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+      <Footer />
     </div>
   );
 }
 
+const useWebFontLoader = () => {
+  useEffect(() => {
+    webfont.load({
+      google: {
+        families: ["Roboto", "Open Sans", "Lato", "Montserrat", "Merriweather"],
+      },
+    });
+    // Add any other initialization logic here if needed
+  }, []);
+};
 export default App;
