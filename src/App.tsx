@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
@@ -8,21 +8,29 @@ import Footer from "./components/Footer";
 import Login from "./components/auth/Login";
 import Explore from "./pages/Explore";
 import Register from "./components/auth/Register";
+import ModelQuestion from "./pages/UserCredentials";
+import ContentWrapper from "./components/ContentWrapper";
+export const StepperVisible = createContext();
 function App() {
   // const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
 
   // useWebFontLoader();
   return (
     <div className="relative">
-      <Header />
-      <Routes>
+      <StepperVisible.Provider value={{ isVisible, setIsVisible }}>
+        <Header />
+        <Home />
+      </StepperVisible.Provider>
+
+      {/* <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/sign-in" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/sign-up" element={<Register />} />
         <Route path="/register" element={<Register />} />
-      </Routes>
+      </Routes> */}
       <Footer />
     </div>
   );

@@ -12,7 +12,7 @@ type Props = {};
 const Footer = (props: Props) => {
   return (
     <ContentWrapper>
-      <div className="w-full flex items-center h-40">
+      <div className="w-full mt-16 flex items-center h-40">
         <div className="flex justify-between w-96 h-24 p-8 border-2 border-solid text-white items-center text-2xl">
           <p>SOCIAL</p>
           <div className="flex gap-8">
