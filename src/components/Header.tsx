@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "./ui/button";
 import ContentWrapper from "./ContentWrapper";
+import { Link } from "react-router-dom";
 
 type Props = {};
 
@@ -12,10 +13,18 @@ const Header = (props: Props) => {
           <img className="h-full w-full" src="/data_mingle.png" alt="" />
         </div>
         <div className="flex gap-8">
-          <Button>Home</Button>
-          <Button>Products</Button>
-          <Button>About us</Button>
-          <Button>sin in</Button>
+          <Link to="/explore">
+            <Button>Explore</Button>
+          </Link>
+          <Link to="/Products">
+            <Button>Products</Button>
+          </Link>
+          <Link to="/about">
+            <Button>About us</Button>
+          </Link>
+          <Link to="/sign-in">
+            <Button>sign in</Button>
+          </Link>
         </div>
       </div>
     </ContentWrapper>

@@ -5,6 +5,9 @@ import Home from "./pages/Home";
 import webfont from "webfontloader";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Login from "./components/auth/Login";
+import Explore from "./pages/Explore";
+import Register from "./components/auth/Register";
 function App() {
   // const [count, setCount] = useState(0);
 
@@ -14,6 +17,11 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/sign-in" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/sign-up" element={<Register />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
       <Footer />
     </div>
