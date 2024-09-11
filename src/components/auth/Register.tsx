@@ -1,145 +1,215 @@
-import React, { useState } from "react";
-import ContentWrapper from "../ContentWrapper";
+import React, { useContext, useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { StepperProgressContext } from "../../App";
+import { maincontainer } from "../../pages/Home";
+import { useAppDispatch, useAppSelector } from "../../store/reduxHooks";
+import { registerUser } from "../../store/userThunks";
+import UserCredentials from "../../pages/UserCredentials";
+interface MainContainerContext {
+  current: HTMLDivElement | null;
+  pages: React.FC[];
+  setPages: React.Dispatch<React.SetStateAction<React.FC[]>>;
+}
 
-// Define a type for component props
-type Props = {};
+const SignUp = () => {
+  const { setIsVisible } = useContext(StepperProgressContext) as {
+    setIsVisible: (value: boolean) => void;
+  };
+  const { status, isAuthenticated } = useAppSelector((state) => state.user);
 
-const Register: React.FC<Props> = () => {
-  // State variables for form data and error handling
-  const [username, setUsername] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const mainContent = useContext(maincontainer) as MainContainerContext;
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [naviagateNext, setNavigateNext] = useState(false);
+  const dispatch = useAppDispatch();
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsVisible(true);
+    const email = (event.currentTarget[0] as HTMLInputElement).value;
+    const password = (event.currentTarget[1] as HTMLInputElement).value;
+    const confirmPassword = (event.currentTarget[2] as HTMLInputElement).value;
+    const data = new FormData();
+    data.append("email", email);
+    data.append("password", password);
+    data.append("confirmPassword", confirmPassword);
 
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Basic form validation
-    if (!username || !email || !password || !confirmPassword) {
-      setError("Please fill in all fields.");
-      return;
+    dispatch(registerUser(data));
+  };
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+  useEffect(() => {
+    if (mainContent.current && isAuthenticated) {
+      mainContent.setPages((prev) => [...prev, UserCredentials]);
+      mainContent.current.scrollTo({
+        left: mainContent.current.scrollWidth / mainContent.pages.length,
+        behavior: "smooth",
+      });
+      // console.log(mainContent.current);
+      setNavigateNext(true);
     }
+  }, [isAuthenticated]);
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
+  // useEffect(() => {
+  //   if (mainContent.current && isAuthenticated) {
+  //     console.log("gvsd");
+  //     const observer = new MutationObserver(() => {
+  //       if (mainContent.current) {
+  //         const firstChild = mainContent.current.children[0] as HTMLElement;
+  //         const childrenCount = firstChild?.children.length;
+  //         console.log(childrenCount);
+  //         // Check if the first child has children
+  //         if (childrenCount && childrenCount > 1) {
+  //           // If you want to ensure you are reacting to changes:
+  //           console.log("navigate");
+  //           setNavigateNext(true); // Set loading complete if first child has multiple children
+  //         }
+  //       }
+  //     });
+
+  //     observer.observe(mainContent.current, {
+  //       childList: true,
+  //       subtree: true,
+  //     });
+
+  //     return () => {
+  //       observer.disconnect(); // Clean up observer on unmount
+  //     };
+  //   }
+  // }, [mainContent]);
+  useEffect(() => {
+    if (mainContent.current && naviagateNext) {
+      setNavigateNext(false);
+      console.log(mainContent.pages);
+      mainContent.current.scrollTo({
+        left: mainContent.current.scrollWidth / mainContent.pages.length,
+        behavior: "smooth",
+      });
+      setTimeout(() => {
+        mainContent.setPages((prev) => [...prev.slice(1)]);
+      }, 1000);
     }
-
-    // Reset error if validation passes
-    setError("");
-
-    // Add register logic here (e.g., API call)
-    console.log("Register submitted:", { username, email, password });
+  }, [naviagateNext]);
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
-    <ContentWrapper>
-      <div className="absolute inset-0 h-full w-full bg-purple-800 -z-10"></div>
-      <div className="flex justify-center items-center h-screen ">
-        <div className="w-full max-w-md  rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+    <div className="h-full flex items-center justify-center">
+      <div className="bg-gray-900/75 p-8 rounded-lg h-full shadow-lg max-w-sm w-full">
+        <h2 className="text-2xl font-bold text-center mb-6 text-white">
+          Sign Up
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email Field */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-white"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              className="mt-1 p-2 text-gray-900 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="Enter your email"
+            />
+          </div>
 
-          {error && (
-            <div className="text-red-500 text-center mb-4">{error}</div>
-          )}
+          {/* Password Field */}
+          <div className="relative">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-white"
+            >
+              Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              className="mt-1 p-2 text-gray-900 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="Enter your password"
+            />
+            <div
+              className="absolute inset-y-0 right-0 pr-3 mt-[24px] flex items-center cursor-pointer"
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? (
+                <FontAwesomeIcon icon={faEyeSlash} />
+              ) : (
+                <FontAwesomeIcon icon={faEye} />
+              )}
+            </div>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Username Input */}
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Username
-              </label>
+          {/* Confirm Password Field */}
+          <div className="relative">
+            <label
+              htmlFor="confirm-password"
+              className="block  text-sm font-medium text-white"
+            >
+              Confirm Password
+            </label>
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              id="confirm-password"
+              className="mt-1 p-2 text-gray-900 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="Confirm your password"
+            />
+            <div
+              className="absolute inset-y-0 right-0 pr-3 mt-[24px] flex items-center cursor-pointer"
+              onClick={toggleConfirmPasswordVisibility}
+            >
+              {showConfirmPassword ? (
+                <FontAwesomeIcon className="h-5 w-5" icon={faEyeSlash} />
+              ) : (
+                <FontAwesomeIcon className="h-5 w-5" icon={faEye} />
+              )}
+            </div>
+          </div>
+
+          {/* Stay Signed In and Forgot Password */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
               <input
-                type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your username"
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
               />
-            </div>
-
-            {/* Email Input */}
-            <div>
               <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-white"
               >
-                Email
+                Stay signed in
               </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your email"
-              />
             </div>
 
-            {/* Password Input */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
+            <div className="text-sm">
+              <a
+                href="#"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
               >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your password"
-              />
+                Forgot Password?
+              </a>
             </div>
+          </div>
 
-            {/* Confirm Password Input */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Confirm your password"
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors duration-300"
-              >
-                Register
-              </button>
-            </div>
-          </form>
-
-          {/* Login Link */}
-          <p className="text-sm text-center text-gray-600 mt-4">
-            Already have an account?{" "}
-            <a href="/login" className="text-blue-500 hover:underline">
-              Login here
-            </a>
-          </p>
-        </div>
+          {/* Sign Up Button */}
+          <div>
+            <button
+              type="submit"
+              className="w-full  bg-yellow-600 text-gray-800 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm  hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 font-bold focus:ring-indigo-500"
+            >
+              Sign Up
+            </button>
+          </div>
+        </form>
       </div>
-    </ContentWrapper>
+    </div>
   );
 };
 
-export default Register;
+export default SignUp;

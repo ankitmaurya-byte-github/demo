@@ -8,6 +8,7 @@ import Check from "@mui/icons-material/Check";
 import SettingsIcon from "@mui/icons-material/Settings";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import VideoLabelIcon from "@mui/icons-material/VideoLabel";
+import { StepperProgressContext } from "../../App";
 import StepConnector, {
   stepConnectorClasses,
 } from "@mui/material/StepConnector";
@@ -117,8 +118,8 @@ const ColorlibStepIconRoot = styled("div")<{
   backgroundColor: "#ccc",
   zIndex: 1,
   color: "#fff",
-  width: 50,
-  height: 50,
+  width: 40,
+  height: 40,
   display: "flex",
   borderRadius: "50%",
   justifyContent: "center",
@@ -164,23 +165,24 @@ function ColorlibStepIcon(props: StepIconProps) {
   );
 }
 
-const steps = [
-  "Select campaign settings",
-  "Create an ad group",
-  "Create an ad",
-];
+const steps = ["User's Credentials", "Model Configuration", "Model Run"];
 
 export default function CustomizedSteppers() {
+  const { activeStep } = React.useContext(StepperProgressContext) as {
+    activeStep: number;
+  };
   return (
-    <Stack sx={{ width: "100%" }} spacing={4}>
+    <Stack sx={{ placeSelf: "center", width: "70%" }} spacing={4}>
       <Stepper
         alternativeLabel
-        activeStep={1}
+        activeStep={activeStep}
         connector={<ColorlibConnector />}
       >
         {steps.map((label) => (
           <Step key={label}>
-            <StepLabel StepIconComponent={ColorlibStepIcon}>{label}</StepLabel>
+            <StepLabel StepIconComponent={ColorlibStepIcon}>
+              <div className="text-white">{label}</div>
+            </StepLabel>
           </Step>
         ))}
       </Stepper>

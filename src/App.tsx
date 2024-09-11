@@ -10,18 +10,20 @@ import Explore from "./pages/Explore";
 import Register from "./components/auth/Register";
 import ModelQuestion from "./pages/UserCredentials";
 import ContentWrapper from "./components/ContentWrapper";
-export const StepperVisible = createContext();
+export const StepperProgressContext = createContext();
 function App() {
   // const [count, setCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
-
+  const [isVisible, setIsVisible] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
   // useWebFontLoader();
   return (
     <div className="relative">
-      <StepperVisible.Provider value={{ isVisible, setIsVisible }}>
+      <StepperProgressContext.Provider
+        value={{ isVisible, setIsVisible, activeStep, setActiveStep }}
+      >
         <Header />
         <Home />
-      </StepperVisible.Provider>
+      </StepperProgressContext.Provider>
 
       {/* <Routes>
         <Route path="/" element={<Home />} />
@@ -31,7 +33,7 @@ function App() {
         <Route path="/sign-up" element={<Register />} />
         <Route path="/register" element={<Register />} />
       </Routes> */}
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

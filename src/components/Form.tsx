@@ -1,16 +1,21 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import { StepperVisible } from "../App";
 
-const Form = ({ title }: { title: string }) => {
-  const { setIsVisible } = useContext(StepperVisible);
+const Form = ({
+  setRef,
+  title,
+}: {
+  setRef: React.Dispatch<React.SetStateAction<HTMLFormElement | null>>;
+  title: string;
+}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsVisible(true);
-  };
+  const ref = useRef();
+  useEffect(() => {
+    setRef(ref);
+  }, []);
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -25,7 +30,7 @@ const Form = ({ title }: { title: string }) => {
         {title}
       </h2>
       <div className="bg-gray-900/75 p-8 rounded-lg w-full shadow-lg max-w-sm ">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form ref={ref} className="space-y-4">
           {/* Email Field */}
           <div>
             <label

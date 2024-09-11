@@ -4,8 +4,15 @@ type Props = {
   children: ReactNode;
 };
 
-const ContentWrapper = ({ children }: Props) => {
-  return <div className="w-full max-w-[1200px] mx-auto px-5">{children}</div>;
+const ContentWrapper = ({
+  children,
+  className,
+}: Props & { className?: string }) => {
+  return (
+    <div className={`w-full max-w-[1200px] mx-auto px-5 ${className || ""}`}>
+      {children}
+    </div>
+  );
 };
 
 export default ContentWrapper;

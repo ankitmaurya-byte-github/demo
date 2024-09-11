@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import CustomizedSteppers from "../components/ui/Stepper";
 import { AnimationLogo1 } from "../components/imageGif/AnimationLogo";
 import SignUp from "../components/auth/Login";
@@ -12,8 +12,18 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Form from "../components/Form";
 import { Button } from "../../components/ui/button";
-
-const ConfigurationCard = ({ title, isConfigured }) => {
+import { maincontainer } from "../Home";
+import UserCredentials from "../UserCredentials";
+import ModelConfiguration from "../ModelConfiguration";
+import { setLocation } from "../../store/modelConfiguration/locationSlice";
+import { useAppDispatch } from "../../store/reduxHooks";
+import { setModelProgress } from "../../store/modelConfiguration/modelSlice";
+interface MainContainerContext {
+  current: HTMLDivElement | null;
+  pages: React.FC[];
+  setPages: React.Dispatch<React.SetStateAction<React.FC[]>>;
+}
+const ConfigurationCard = () => {
   return (
     <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg mb-4 shadow-lg">
       {/* Email Field */}
@@ -46,11 +56,80 @@ const ConfigurationCard = ({ title, isConfigured }) => {
     </div>
   );
 };
-const LocationMaster = (props: Props) => {
-  const [numberOfLoactions, setNumberOfLoactions] = useState(5);
+const LocationMaster = () => {
+  const mainContent = useContext(maincontainer) as MainContainerContext;
+  const [navigateBack, setNavigateBack] = useState(false);
+  const [numberOfLoactions, setNumberOfLoactions] = useState(3);
+  const dispatch = useAppDispatch();
+  // const [locations, setLocations] = useState({});
+  const ref = useRef();
+  const handleNavigateBack = () => {
+    setNavigateBack((prev) => !prev);
+    mainContent.setPages((prev) => [...prev, ModelConfiguration]);
+    mainContent.current.scrollTo({
+      left: mainContent.current.scrollWidth / mainContent.pages.length,
+      behavior: "smooth",
+    });
+  };
+  const handelLocationsubmit = () => {
+    if (ref.current && ref.current.children) {
+      const location = {};
+      Array.from(ref.current?.children || []).forEach((child, index) => {
+        if (index == 0) return;
+        if ("children" in child && child.children instanceof HTMLCollection) {
+          const input = { location: "", latitude: "", longitude: "" };
+          Array.from(child.children).forEach((nestedChild, idx) => {
+            if (
+              nestedChild instanceof HTMLElement &&
+              nestedChild.children[0] instanceof HTMLInputElement
+            ) {
+              if (idx == 0) {
+                input.location = nestedChild.children[0].value;
+              } else if (idx == 1) {
+                input.latitude = nestedChild.children[0].value;
+              } else {
+                input.longitude = nestedChild.children[0].value;
+              }
+              console.log(nestedChild.children[0].value);
+            }
+          });
+          (location as Record<string, typeof input>)[`input${index}`] = input;
+        }
+      });
+      dispatch(setLocation({ locations: location }));
+      // dispatch(setModelProgress("location"));
+      console.log(location);
+      setNavigateBack((prev) => !prev);
+      mainContent.setPages((prev) => [...prev, ModelConfiguration]);
+      mainContent.current.scrollTo({
+        left: mainContent.current.scrollWidth / mainContent.pages.length,
+        behavior: "smooth",
+      });
+    }
+  };
+  useEffect(() => {
+    console.log("navigateBack" + navigateBack);
+    if (mainContent.current && navigateBack) {
+      setNavigateBack((prev) => !prev);
+      console.log(mainContent.pages);
+      mainContent.current.scrollTo({
+        left: mainContent.current.scrollWidth / mainContent.pages.length,
+        behavior: "smooth",
+      });
+      // setTimeout(() => {
+      //   mainContent.current.scrollTo({
+      //     left: 0,
+      //     behavior: "smooth",
+      //   });
+      // }, 100);
+      setTimeout(() => {
+        mainContent.setPages((prev) => prev.slice(1));
+      }, 1000);
+    }
+  }, [navigateBack]);
   return (
     <div className=" h-screen grid grid-cols-[3fr_1fr] items-center justify-center  w-full ">
-      <div className="">
+      <div className="m-auto w-[82%]">
         <div className="flex items-center mb-6">
           <FontAwesomeIcon
             className="h-8 w-8 text-orange-500 mr-2"
@@ -66,36 +145,43 @@ const LocationMaster = (props: Props) => {
             </label>
             <input
               type="number"
-              className="p-2 w-2rem border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[rgb(40,50,86)] focus:border-transparent text-gray-900"
+              className="p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[rgb(40,50,86)] focus:border-transparent w-[4rem]  text-gray-900"
               placeholder="e.g., 5"
               min="1"
               value={numberOfLoactions}
               onChange={(e) => setNumberOfLoactions(Number(e.target.value))}
             />
           </div>
-          <div className="h-[27rem] overflow-auto hide-scrollbar">
+          <div ref={ref} className="h-[27rem] overflow-auto hide-scrollbar">
             {" "}
+            <div className="grid grid-cols-3 place-items-center px-4 py-2 text-2xl text-white rounded-lg mb-4 shadow-lg">
+              <div>Location</div>
+              <div>Latitude</div>
+              <div>Longitude</div>
+            </div>
             {[...Array(numberOfLoactions)].map((_, index) => (
-              <ConfigurationCard
-                key={index}
-                title={`Location ${index + 1}`}
-                isConfigured={true}
-              />
+              <ConfigurationCard key={index} />
             ))}
           </div>
         </div>
       </div>
 
-      <div className="place-self-end mb-24 gap-4 flex flex-col">
+      <div className=" gap-4 flex items-center justify-center flex-col">
         <div>
-          <Button className="bg-yellow-600 text-gray-800 hover:bg-yellow-700 font-bold">
+          <Button
+            onClick={handelLocationsubmit}
+            className="bg-yellow-600 text-gray-800 hover:bg-yellow-700 font-bold"
+          >
             Save & Submit
           </Button>
           <FontAwesomeIcon icon={faArrowRight} />
         </div>
         <div>
           <FontAwesomeIcon icon={faArrowLeft} />
-          <Button className="bg-yellow-600 text-gray-800 hover:bg-yellow-700 font-bold">
+          <Button
+            onClick={handleNavigateBack}
+            className="bg-yellow-600 text-gray-800 hover:bg-yellow-700 font-bold"
+          >
             Back to main
           </Button>
         </div>
