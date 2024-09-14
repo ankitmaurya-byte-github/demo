@@ -53,9 +53,9 @@ const Home = () => {
   useEffect(() => {
     setPages([
       Auth,
+      // LocationMaster,
       // UserCredentials,
       // ModelConfiguration,
-      // LocationMaster,
       // CategoryMaster,
       // PriceMaster,
       // InventoryNorms,

@@ -18,13 +18,14 @@ import ModelConfiguration from "./ModelConfiguration";
 import { maincontainer } from "./Home";
 import { StepperProgressContext } from "../App";
 import axios from "axios";
+import { addUserDetails } from "../store/userThunks";
 interface MainContainerContext {
   current: HTMLDivElement | null;
   pages: React.FC[];
   setPages: React.Dispatch<React.SetStateAction<React.FC[]>>;
 }
 const UserCredentials = (props: Props) => {
-  const { status, isAuthenticated } = useAppSelector((state) => state.user);
+  const { status, error } = useAppSelector((state) => state.information);
   const mainContent = useContext(maincontainer) as MainContainerContext;
   const { setActiveStep } = useContext(StepperProgressContext) as {
     setActiveStep: (value: React.SetStateAction<number>) => void;
@@ -39,6 +40,7 @@ const UserCredentials = (props: Props) => {
   const handelCredentialsSubmit = () => {
     const userInfo: Record<string, string> = {};
     const organisationInfo: Record<string, string> = {};
+    console.log(ref2.current);
     if (ref1.current instanceof HTMLFormElement) {
       Array.from(ref1.current).forEach((element) => {
         if (
@@ -53,7 +55,8 @@ const UserCredentials = (props: Props) => {
       Array.from(ref2.current).forEach((element) => {
         if (
           element instanceof HTMLInputElement ||
-          element instanceof HTMLSelectElement
+          element instanceof HTMLSelectElement ||
+          element instanceof HTMLTextAreaElement
         ) {
           organisationInfo[element.id] = element.value;
         }
@@ -61,19 +64,8 @@ const UserCredentials = (props: Props) => {
     }
     console.log(userInfo);
     console.log(organisationInfo);
-    axios
-      .post("/test", { userInfo, organisationInfo })
-      .then((response) => {
-        // Handle the response
-        console.log(response.data);
-        // dispatch(setInfo(response.data));
-        // setNavigateNext(true);
-        // setActiveStep((prevStep) => prevStep + 1);
-      })
-      .catch((error) => {
-        // Handle any errors
-        console.error("Error:", error);
-      });
+
+    dispatch(addUserDetails({ userInfo, organisationInfo }));
     // mainContent.setPages((prev) => [...prev, ModelConfiguration]);
     // mainContent.current.scrollTo({
     //   left: mainContent.current.scrollWidth / mainContent.pages.length,
@@ -82,6 +74,17 @@ const UserCredentials = (props: Props) => {
     // console.log(mainContent.current);
     // setNavigateNext(true);
   };
+  useEffect(() => {
+    if (mainContent.current && status === "succeeded") {
+      mainContent.setPages((prev) => [...prev, ModelConfiguration]);
+      mainContent.current.scroll({
+        left: mainContent.current.scrollWidth / mainContent.pages.length,
+        behavior: "smooth",
+      });
+      // console.log(mainContent.current);
+      setNavigateNext(true);
+    }
+  }, [status]);
   useEffect(() => {
     if (mainContent.current && naviagateNext) {
       setNavigateNext(false);
@@ -210,6 +213,7 @@ const UserCredentials = (props: Props) => {
         </h2>
         <div className="bg-gray-900/75  h-[30rem]   p-8 rounded-lg w-full shadow-lg max-w-sm  scrollbar-hide">
           <form
+            style={{ scrollbarWidth: "none" }}
             ref={ref2}
             className="space-y-4 overflow-scroll h-full scrollbar-hide"
           >

@@ -15,48 +15,54 @@ import { Button } from "../../components/ui/button";
 import { maincontainer } from "../Home";
 import UserCredentials from "../UserCredentials";
 import ModelConfiguration from "../ModelConfiguration";
-import { setLocation } from "../../store/modelConfiguration/locationSlice";
-import { useAppDispatch } from "../../store/reduxHooks";
+
+import { useAppDispatch, useAppSelector } from "../../store/reduxHooks";
 import { setModelProgress } from "../../store/modelConfiguration/modelSlice";
+import { addLocations } from "../../store/userThunks";
+import { setLocationStatus } from "../../store/modelConfiguration/locationSlice";
 interface MainContainerContext {
   current: HTMLDivElement | null;
   pages: React.FC[];
   setPages: React.Dispatch<React.SetStateAction<React.FC[]>>;
 }
-const ConfigurationCard = () => {
+const ConfigurationCard = ({ index }: { index: number }) => {
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg mb-4 shadow-lg">
-      {/* Email Field */}
+    <div className="flex items-center justify-between p-2 bg-gray-900 rounded-lg px-8 relative  mb-2 shadow-lg">
+      <div className="absolute text-white left-3">{index + 1}</div>
+      {/* location Field */}
       <div>
         <input
-          type="email"
-          id="email"
+          type="text"
+          id="location"
           className="mt-1 p-2 text-gray-900 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          placeholder="Enter your email"
+          placeholder="eg: mumbai, india"
         />
       </div>
-      {/* Email Field */}
+      {/* Latitude Field */}
       <div>
         <input
-          type="email"
-          id="email"
+          type="text"
+          id="latitude"
           className="mt-1 p-2 text-gray-900 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          placeholder="Enter your email"
+          placeholder="eg: 19°02′11.11″ N"
         />
       </div>
-      {/* Email Field */}
+      {/* Longitude Field */}
       <div>
         <input
-          type="email"
-          id="email"
+          type="text"
+          id="longitude"
           className="mt-1 p-2 text-gray-900 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          placeholder="Enter your email"
+          placeholder="eg: 72°51′34.09″ E"
         />
       </div>
     </div>
   );
 };
 const LocationMaster = () => {
+  const { status, locations, error } = useAppSelector(
+    (state) => state.modelConfiguration.LocationMaster
+  );
   const mainContent = useContext(maincontainer) as MainContainerContext;
   const [navigateBack, setNavigateBack] = useState(false);
   const [numberOfLoactions, setNumberOfLoactions] = useState(3);
@@ -72,41 +78,63 @@ const LocationMaster = () => {
     });
   };
   const handelLocationsubmit = () => {
-    if (ref.current && ref.current.children) {
-      const location = {};
-      Array.from(ref.current?.children || []).forEach((child, index) => {
-        if (index == 0) return;
-        if ("children" in child && child.children instanceof HTMLCollection) {
-          const input = { location: "", latitude: "", longitude: "" };
+    if (ref.current) {
+      const location: Record<
+        string,
+        { location: string; latitude: string; longitude: string }
+      > = {};
+      console.log(ref.current);
+      Array.from(ref.current.children).forEach((child, index) => {
+        if (index === 0) return;
+        const input = {};
+        const field = ["location", "latitude", "longitude"];
+        Array.from(child.children).forEach((nestedChild, idx) => {
+          input[field[idx]] = nestedChild.children[0].value;
+        });
+        location[`input${index}`] = input;
+      });
+      console.log(location);
+
+      dispatch(addLocations({ locations: location }));
+      // dispatch(setModelProgress("location"));
+      // console.log(location);
+      // setNavigateBack((prev) => !prev);
+      // mainContent.setPages((prev) => [...prev, ModelConfiguration]);
+      // mainContent.current.scrollTo({
+      //   left: mainContent.current.scrollWidth / mainContent.pages.length,
+      //   behavior: "smooth",
+      // });
+    }
+  };
+  useEffect(() => {
+    if (status === "idel") {
+      if (ref.current) {
+        Array.from(ref.current.children).forEach((child, index) => {
+          if (index === 0) return;
+          if (index > Object.keys(locations).length) return;
+          const input = locations[`input${index}`];
+          const field = ["location", "latitude", "longitude"];
           Array.from(child.children).forEach((nestedChild, idx) => {
-            if (
-              nestedChild instanceof HTMLElement &&
-              nestedChild.children[0] instanceof HTMLInputElement
-            ) {
-              if (idx == 0) {
-                input.location = nestedChild.children[0].value;
-              } else if (idx == 1) {
-                input.latitude = nestedChild.children[0].value;
-              } else {
-                input.longitude = nestedChild.children[0].value;
-              }
-              console.log(nestedChild.children[0].value);
+            if (nestedChild.children[0]) {
+              nestedChild.children[0].value = input[field[idx]];
             }
           });
-          (location as Record<string, typeof input>)[`input${index}`] = input;
-        }
-      });
-      dispatch(setLocation({ locations: location }));
-      // dispatch(setModelProgress("location"));
-      console.log(location);
-      setNavigateBack((prev) => !prev);
+        });
+      }
+    }
+    if (mainContent.current && status === "succeeded") {
+      dispatch(setModelProgress("location"));
+      dispatch(setLocationStatus("idel"));
+
       mainContent.setPages((prev) => [...prev, ModelConfiguration]);
-      mainContent.current.scrollTo({
+      mainContent.current.scroll({
         left: mainContent.current.scrollWidth / mainContent.pages.length,
         behavior: "smooth",
       });
+      // console.log(mainContent.current);
+      setNavigateBack(true);
     }
-  };
+  }, [status]);
   useEffect(() => {
     console.log("navigateBack" + navigateBack);
     if (mainContent.current && navigateBack) {
@@ -128,8 +156,8 @@ const LocationMaster = () => {
     }
   }, [navigateBack]);
   return (
-    <div className=" h-screen grid grid-cols-[3fr_1fr] items-center justify-center  w-full ">
-      <div className="m-auto w-[82%]">
+    <div className=" h-full grid grid-cols-[3fr_1fr] items-center justify-center  w-full ">
+      <div className="m-auto w-[86%]">
         <div className="flex items-center mb-6">
           <FontAwesomeIcon
             className="h-8 w-8 text-orange-500 mr-2"
@@ -152,7 +180,7 @@ const LocationMaster = () => {
               onChange={(e) => setNumberOfLoactions(Number(e.target.value))}
             />
           </div>
-          <div ref={ref} className="h-[27rem] overflow-auto hide-scrollbar">
+          <div ref={ref} className="h-96 overflow-auto hide-scrollbar">
             {" "}
             <div className="grid grid-cols-3 place-items-center px-4 py-2 text-2xl text-white rounded-lg mb-4 shadow-lg">
               <div>Location</div>
@@ -160,7 +188,7 @@ const LocationMaster = () => {
               <div>Longitude</div>
             </div>
             {[...Array(numberOfLoactions)].map((_, index) => (
-              <ConfigurationCard key={index} />
+              <ConfigurationCard index={index} key={index} />
             ))}
           </div>
         </div>

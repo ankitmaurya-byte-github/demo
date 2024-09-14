@@ -6,6 +6,7 @@ import { maincontainer } from "../../pages/Home";
 import { useAppDispatch, useAppSelector } from "../../store/reduxHooks";
 import { loginUser, registerUser } from "../../store/userThunks";
 import UserCredentials from "../../pages/UserCredentials";
+import ModelConfiguration from "../../pages/ModelConfiguration";
 interface MainContainerContext {
   current: HTMLDivElement | null;
   pages: React.FC[];
@@ -39,7 +40,7 @@ const SignIn = () => {
   };
   useEffect(() => {
     if (mainContent.current && isAuthenticated) {
-      mainContent.setPages((prev) => [...prev, UserCredentials]);
+      mainContent.setPages((prev) => [...prev, ModelConfiguration]);
       mainContent.current.scroll({
         left: mainContent.current.scrollWidth / mainContent.pages.length,
         behavior: "smooth",

@@ -30,7 +30,7 @@ const Header = (props: Props) => {
     >
       <ContentWrapper className="h-full grid grid-cols-[20%_80%] ">
         <div className="h-full w-40">
-          <img className="h-full w-full" src="" alt="" />
+          <img className="h-full w-full" src="/data_mingle.png" alt="" />
         </div>
         {isVisible && <CustomizedSteppers />}
       </ContentWrapper>

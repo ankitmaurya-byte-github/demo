@@ -10,6 +10,7 @@ import {
   faCircleCheck,
   faGear,
   faGears,
+  faHourglassHalf,
 } from "@fortawesome/free-solid-svg-icons";
 import Form from "../components/Form";
 import LocationMaster from "./modelConfig/LocationMaster";
@@ -21,6 +22,18 @@ import ShipmentNorms from "./modelConfig/ShipmentNorms";
 import { useAppSelector } from "../store/reduxHooks";
 
 const ModelConfiguration = (props: Props) => {
+  const {
+    location,
+    pricemaster,
+    CategoryMaster: categorymaster,
+    InventoryNorms: inventorynorms,
+    ShipmentNoderm,
+    locationPending,
+    CategoryMasterPending,
+    pricemasterPending,
+    InventoryNormsPending,
+    ShipmentNormPending,
+  } = useAppSelector((state) => state.modelConfigProcess);
   const [navigateNext, setNavigateNext] = useState(false);
   const mainContent = useContext(maincontainer);
   const setNavigate = () => {
@@ -76,13 +89,15 @@ const ModelConfiguration = (props: Props) => {
   const ConfigurationCard = ({
     title,
     isConfigured,
+    isPending,
   }: {
     title: string;
     isConfigured: boolean;
+    isPending: boolean;
   }) => {
     const [buttonHover, setButtonHover] = useState(false);
     return (
-      <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg mb-4 shadow-lg">
+      <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg shadow-lg">
         <h3 className="text-white text-lg">{title}</h3>
         <div className="flex items-center">
           <button
@@ -99,6 +114,12 @@ const ModelConfiguration = (props: Props) => {
             />
             Configure
           </button>
+          {isPending && (
+            <FontAwesomeIcon
+              className="h-6 w-6 text-blue-400 ml-4"
+              icon={faHourglassHalf}
+            />
+          )}
           {isConfigured && (
             <FontAwesomeIcon
               className="h-6 w-6 text-green-500 ml-4"
@@ -111,7 +132,7 @@ const ModelConfiguration = (props: Props) => {
   };
   return (
     <div className="h-full  w-full ">
-      <div className="h-screen flex flex-col items-center justify-center bg-cover bg-center">
+      <div className="h-full flex flex-col items-center justify-center bg-cover bg-center">
         <div className="flex items-center mb-6">
           <FontAwesomeIcon
             className="h-8 w-8 text-orange-500 mr-2"
@@ -122,14 +143,31 @@ const ModelConfiguration = (props: Props) => {
             Models Configurations
           </h2>
         </div>
-        <div className="bg-gray-900 bg-opacity-75 p-8 rounded-lg max-w-3xl w-full">
-          <ConfigurationCard title="Location Master" isConfigured={true} />
-          <ConfigurationCard title="Category Master" isConfigured={false} />
-          <ConfigurationCard title="Price Master" isConfigured={false} />
-          <ConfigurationCard title="Inventory Norms" isConfigured={false} />
+        <div className="bg-gray-900 bg-opacity-75 p-6 rounded-lg max-w-3xl flex flex-col gap-4 w-full">
+          <ConfigurationCard
+            title="Location Master"
+            isConfigured={location}
+            isPending={locationPending}
+          />
+          <ConfigurationCard
+            title="Category Master"
+            isConfigured={categorymaster}
+            isPending={CategoryMasterPending}
+          />
+          <ConfigurationCard
+            title="Price Master"
+            isConfigured={pricemaster}
+            isPending={pricemasterPending}
+          />
+          <ConfigurationCard
+            title="Inventory Norms"
+            isConfigured={inventorynorms}
+            isPending={InventoryNormsPending}
+          />
           <ConfigurationCard
             title="Price Shipment Master"
-            isConfigured={false}
+            isConfigured={ShipmentNoderm}
+            isPending={ShipmentNormPending}
           />
         </div>
       </div>
